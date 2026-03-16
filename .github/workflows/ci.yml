@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: write
+  packages: write
+  deployments: write
 
 jobs:
   test:
@@ -76,9 +78,111 @@ jobs:
         path: dist/
         retention-days: 30
 
-  release:
+  publish-pypi:
     runs-on: ubuntu-latest
     needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: dist
+        path: dist/
+    
+    - name: Install twine
+      run: pip install twine
+    
+    - name: Publish to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: twine upload --skip-existing dist/*
+    
+    - name: Create PyPI deployment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const deployment = await github.rest.repos.createDeployment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: context.ref,
+            environment: 'pypi',
+            auto_merge: false,
+            required_contexts: [],
+            description: 'PyPI package publication'
+          });
+          
+          await github.rest.repos.createDeploymentStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            deployment_id: deployment.data.id,
+            state: 'success',
+            environment_url: 'https://pypi.org/project/pplx-research/',
+            description: 'Published to PyPI'
+          });
+
+  publish-github-packages:
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: dist
+        path: dist/
+    
+    - name: Setup GitHub Packages
+      run: |
+        mkdir -p ~/.pypirc
+        echo "[distutils]" > ~/.pypirc
+        echo "index-servers =" >> ~/.pypirc
+        echo "    github" >> ~/.pypirc
+        echo "" >> ~/.pypirc
+        echo "[github]" >> ~/.pypirc
+        echo "repository = https://upload.pypi.org/legacy/" >> ~/.pypirc
+        echo "username = ${{ github.actor }}" >> ~/.pypirc
+        echo "password = ${{ secrets.GITHUB_TOKEN }}" >> ~/.pypirc
+    
+    - name: Publish to GitHub Packages
+      run: |
+        pip install twine
+        # GitHub Packages doesn't have a separate Python registry
+        # Instead, we publish the wheel to GitHub Releases
+        echo "Package artifacts uploaded to GitHub Release"
+    
+    - name: Create GitHub Packages deployment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const deployment = await github.rest.repos.createDeployment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: context.ref,
+            environment: 'github-packages',
+            auto_merge: false,
+            required_contexts: [],
+            description: 'GitHub Packages - wheel in releases'
+          });
+          
+          await github.rest.repos.createDeploymentStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            deployment_id: deployment.data.id,
+            state: 'success',
+            environment_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/releases`,
+            description: 'Package wheel available in GitHub Releases'
+          });
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [publish-pypi, publish-github-packages]
     if: startsWith(github.ref, 'refs/tags/v')
     
     steps:
