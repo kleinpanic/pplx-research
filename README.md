@@ -3,7 +3,7 @@
 A monolithic, versatile research CLI powered by Perplexity's Sonar API. Features auto-classification, iterative gap analysis, multi-perspective synthesis, and comprehensive output formats.
 
 [![CI](https://github.com/kleinpanic/pplx-research/actions/workflows/ci.yml/badge.svg)](https://github.com/kleinpanic/pplx-research/actions/workflows/ci.yml)
-[![PyPI version](https://badge.fury.io/py/pplx-research.svg)](https://pypi.org/project/pplx-research/)
+[![PyPI](https://img.shields.io/pypi/v/pplx-research?color=blue&label=PyPI)](https://pypi.org/project/pplx-research/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
