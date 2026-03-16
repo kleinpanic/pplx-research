@@ -3,6 +3,7 @@
 A monolithic, versatile research CLI powered by Perplexity's Sonar API. Features auto-classification, iterative gap analysis, multi-perspective synthesis, and comprehensive output formats.
 
 [![CI](https://github.com/kleinpanic/pplx-research/actions/workflows/ci.yml/badge.svg)](https://github.com/kleinpanic/pplx-research/actions/workflows/ci.yml)
+[![PyPI version](https://badge.fury.io/py/pplx-research.svg)](https://pypi.org/project/pplx-research/)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -60,21 +61,17 @@ Scope:
   -s, --site DOMAIN         Constrain to specific domain
   -e, --exclude DOMAIN      Exclude domain (can use multiple times)
   -t, --time-range {hour,day,week,month,year}
-                           Time range for results
-  -r, --region CODE        Country/region code (US, UK, JP, etc.)
-  -l, --language CODE      Language filter (en, de, ja, etc.)
-  --sources TYPES          Comma-separated: academic,news,docs,forums,code,all
+  -r, --region CODE        Country/region code (US, UK, JP)
+  --sources TYPES          academic,news,docs,forums,code,all
 
 Output:
   -f, --format {markdown,json,summary,plain}
-                           Output format (default: markdown)
   -d, --depth 1-5          Iteration depth (default: 3)
 
 Automation:
-  -a, --auto               Auto-classify query and select optimal settings
-  -o, --output PATH        Save output to file
-  -w, --webhook URL        POST results to webhook on completion
-  -q, --quiet              Suppress progress (for piping)
+  -a, --auto               Auto-classify query
+  -o, --output PATH        Save to file
+  -q, --quiet              Suppress progress
 ```
 
 ## Python API
@@ -83,16 +80,11 @@ Automation:
 from pplx_research import ResearchEngine, PerplexitySDK
 
 # High-level research
-engine = ResearchEngine(
-    query="quantum computing applications",
-    mode="deep",
-    sources=["academic"],
-    depth=4
-)
+engine = ResearchEngine(query="quantum computing", mode="deep", sources=["academic"])
 report = engine.run()
 
 # Low-level SDK
-sdk = PerplexitySDK(api_key="pplx-...")
+sdk = PerplexitySDK()
 result = sdk.chat("Hello", model="sonar-pro")
 ```
 
