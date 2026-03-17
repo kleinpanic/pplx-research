@@ -43,7 +43,7 @@ pplx-research "Rust vs Go for systems programming" --mode synthesis --format jso
 |------|-------------|-----------|
 | `quick` | Facts, definitions, single-question lookups | 1 |
 | `deep` | Complex topics, research reports, gap analysis | depth × N |
-| `synthesis` | Comparisons, debates, multi-perspective topics | sources × depth |
+| `synthesis` | Comparisons, debates, multi-perspective topics | 1 per source type |
 
 Default mode is `quick`. Use `--auto` to let the classifier decide.
 
@@ -58,9 +58,9 @@ Default mode is `quick`. Use `--auto` to let the classifier decide.
 | `--time-range` | `-t` | `hour` `day` `week` `month` `year` | — | Recency filter |
 | `--region` | `-r` | ISO country code | — | e.g. `US`, `UK`, `JP` |
 | `--language` | `-l` | ISO 639-1 code | — | e.g. `en`, `de`, `ja` |
-| `--depth` | `-d` | integer 1–5 | `3` | Iterations for deep/synthesis |
+| `--depth` | `-d` | integer 1–5 | `3` | Iterations for deep mode only (ignored in quick/synthesis) |
 | `--sources` | — | `academic,news,docs,forums,code,all` | `all` | Comma-separated list |
-| `--reasoning-effort` | — | `minimal` `low` `medium` `high` | — | For sonar-reasoning model |
+| `--reasoning-effort` | — | `minimal` `low` `medium` `high` | — | Passed to sonar-reasoning; only effective in deep mode |
 | `--return-images` | — | flag | off | Include image URLs in response |
 | `--return-related-questions` | — | flag | off | Include follow-up questions |
 | `--output` | `-o` | file path | — | Also write result to file |
@@ -73,14 +73,14 @@ Default mode is `quick`. Use `--auto` to let the classifier decide.
 | Format | Structure | Best for |
 |--------|-----------|----------|
 | `markdown` | Headers, sections, bullet lists | Human reading, documents |
-| `json` | `{"report": "...", "sources": [...], ...}` | Programmatic parsing |
+| `json` | `{"content": "...", "citations": [...], ...}` | Programmatic parsing |
 | `summary` | Single concise paragraph | Quick agent consumption |
 | `plain` | Unformatted text | Simple piping |
 
 **Parsing JSON output:**
 ```bash
 result=$(pplx-research "topic" --format json --quiet)
-report=$(echo "$result" | python3 -c "import sys,json; print(json.load(sys.stdin)['report'])")
+content=$(echo "$result" | python3 -c "import sys,json; print(json.load(sys.stdin)['content'])")
 ```
 
 ## Running Quietly for Piping
