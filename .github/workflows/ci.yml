@@ -132,11 +132,26 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
         name: dist
         path: dist/
+    
+    - name: Install twine
+      run: pip install twine
+    
+    - name: Publish to GitHub Packages
+      env:
+        TWINE_USERNAME: ${{ github.actor }}
+        TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        twine upload --skip-existing --repository-url https://upload.pypi.org/legacy/ dist/
     
     - name: Create GitHub Packages deployment
       uses: actions/github-script@v7

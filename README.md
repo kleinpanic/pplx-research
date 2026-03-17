@@ -7,6 +7,27 @@ A monolithic, versatile research CLI powered by Perplexity's Sonar API. Features
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Documentation
+
+**Man page** — view without installing:
+
+```bash
+man docs/man/pplx-research.1
+```
+
+Install system-wide:
+
+```bash
+sudo cp docs/man/pplx-research.1 /usr/local/share/man/man1/ && sudo mandb
+man pplx-research
+```
+
+**OpenClaw skill** — install for AI agent use:
+
+```bash
+bash scripts/install-skill.sh
+```
+
 ## Why This Exists
 
 Other Perplexity wrappers are simple API clients. **PPLX Research is a research orchestration layer** that adds:

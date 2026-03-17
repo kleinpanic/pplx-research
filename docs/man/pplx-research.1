@@ -1,0 +1,194 @@
+.TH PPLX\-RESEARCH 1 "2026-03-16" "1.0.2" "User Commands"
+.SH NAME
+pplx\-research \- research CLI powered by Perplexity Sonar API
+.SH SYNOPSIS
+.B pplx\-research
+.I QUERY
+[\fB\-m\fR \fIMODE\fR]
+[\fB\-f\fR \fIFORMAT\fR]
+[\fB\-s\fR \fIDOMAIN\fR]
+[\fB\-e\fR \fIDOMAIN\fR]
+[\fB\-t\fR \fIRANGE\fR]
+[\fB\-r\fR \fICODE\fR]
+[\fB\-l\fR \fICODE\fR]
+[\fB\-d\fR \fIINT\fR]
+[\fB\-\-sources\fR \fITYPES\fR]
+[\fB\-\-reasoning\-effort\fR \fILEVEL\fR]
+[\fB\-\-return\-images\fR]
+[\fB\-\-return\-related\-questions\fR]
+[\fB\-o\fR \fIFILE\fR]
+[\fB\-w\fR \fIURL\fR]
+[\fB\-q\fR]
+[\fB\-a\fR]
+.SH DESCRIPTION
+.B pplx\-research
+is a monolithic, versatile research orchestration tool built on the Perplexity
+Sonar API. It goes beyond simple API wrapping to provide auto-classification of
+queries, iterative gap analysis, and multi-perspective synthesis from diverse
+source types.
+.PP
+The tool supports three research modes: a fast single-query
+.B quick
+mode, an iterative
+.B deep
+mode that identifies and fills knowledge gaps across multiple rounds, and a
+.B synthesis
+mode that gathers perspectives from academic papers, news, documentation,
+forums, and code repositories.
+.SH OPTIONS
+.SS Positional Arguments
+.TP
+.I QUERY
+The research topic or question to investigate. Enclose in quotes if it contains
+spaces or shell metacharacters.
+.SS Mode
+.TP
+\fB\-m\fR, \fB\-\-mode\fR \fI{quick,deep,synthesis}\fR
+Research mode. Default: \fBquick\fR.
+See
+.B MODES
+below for details.
+.SS Output Format
+.TP
+\fB\-f\fR, \fB\-\-format\fR \fI{markdown,json,summary,plain}\fR
+Output format. Default: \fBmarkdown\fR.
+.RS
+.TP
+.B markdown
+Structured markdown with headers and sections.
+.TP
+.B json
+Machine-readable JSON object.
+.TP
+.B summary
+Concise paragraph summary.
+.TP
+.B plain
+Unformatted plain text.
+.RE
+.SS Scope
+.TP
+\fB\-s\fR, \fB\-\-site\fR \fIDOMAIN\fR
+Constrain search results to a specific domain (e.g., \fBreddit.com\fR,
+\fBstackoverflow.com\fR).
+.TP
+\fB\-e\fR, \fB\-\-exclude\fR \fIDOMAIN\fR
+Exclude a domain from results. This flag may be repeated to exclude multiple
+domains (e.g., \fB\-e example.com \-e spam.net\fR).
+.TP
+\fB\-t\fR, \fB\-\-time\-range\fR \fI{hour,day,week,month,year}\fR
+Restrict results to documents published within the given time range.
+.TP
+\fB\-r\fR, \fB\-\-region\fR \fICODE\fR
+Country or region code to bias results (e.g., \fBUS\fR, \fBUK\fR, \fBJP\fR,
+\fBDE\fR).
+.TP
+\fB\-l\fR, \fB\-\-language\fR \fICODE\fR
+ISO 639-1 language filter (e.g., \fBen\fR, \fBde\fR, \fBja\fR, \fBfr\fR).
+.SS Depth and Sources
+.TP
+\fB\-d\fR, \fB\-\-depth\fR \fIINT\fR
+Iteration depth for
+.B deep
+and
+.B synthesis
+modes. Accepts values 1\(en5. Default: \fB3\fR. Higher values produce more
+comprehensive reports at the cost of additional API calls and latency.
+.TP
+\fB\-\-sources\fR \fITYPES\fR
+Comma-separated list of source types to query. Valid values:
+\fBacademic\fR, \fBnews\fR, \fBdocs\fR, \fBforums\fR, \fBcode\fR, \fBall\fR.
+Default: \fBall\fR. Example: \fB\-\-sources academic,news\fR.
+.SS Reasoning
+.TP
+\fB\-\-reasoning\-effort\fR \fI{minimal,low,medium,high}\fR
+Reasoning effort level passed to the Perplexity sonar-reasoning model. Only
+relevant when using a reasoning-capable model. When unset, the API default
+applies.
+.SS Response Enrichment
+.TP
+.B \-\-return\-images
+Include image results in the API response.
+.TP
+.B \-\-return\-related\-questions
+Include a list of related follow-up questions in the response.
+.SS Integration
+.TP
+\fB\-o\fR, \fB\-\-output\fR \fIFILE\fR
+Write the final report to \fIFILE\fR in addition to printing to stdout.
+.TP
+\fB\-w\fR, \fB\-\-webhook\fR \fIURL\fR
+HTTP POST the completed results to \fIURL\fR upon completion.
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Suppress all progress output and spinner. Only the final result is written to
+stdout. Useful for piping output to other commands or scripts.
+.TP
+\fB\-a\fR, \fB\-\-auto\fR
+Auto-classify the query and automatically select the optimal mode, depth, and
+source types. Overrides explicit \fB\-\-mode\fR, \fB\-\-depth\fR, and
+\fB\-\-sources\fR values when enabled.
+.SH MODES
+.TP
+.B quick
+Performs a single Perplexity API query and returns the result. Fastest mode;
+suitable for factual lookups, definitions, and current-events queries.
+.TP
+.B deep
+Iteratively identifies knowledge gaps in previous answers and issues follow-up
+queries to fill them. Produces a comprehensive, structured research report.
+Controlled by \fB\-\-depth\fR (default 3 iterations).
+.TP
+.B synthesis
+Queries multiple source-type perspectives (academic, news, forums, etc.) and
+synthesises them into a unified analysis. Best for comparisons, debates, and
+topics where diverse viewpoints add value.
+.SH EXAMPLES
+.TP
+Basic lookup:
+.B pplx\-research "what is quantum entanglement"
+.TP
+Deep academic research with 4 iterations:
+.B pplx\-research "transformer architecture" \-\-mode deep \-\-sources academic \-\-depth 4
+.TP
+Multi-perspective comparison, JSON output:
+.B pplx\-research "React vs Vue performance" \-\-mode synthesis \-\-format json
+.TP
+Domain-restricted search, save to file:
+.B pplx\-research "hiking trails near Asheville" \-\-site alltrails.com \-o report.md
+.TP
+Recent news only:
+.B pplx\-research "latest AI safety research" \-\-time\-range week \-\-sources news
+.TP
+Auto-classify and run quietly for piping:
+.B pplx\-research "compare Rust vs Go for systems programming" \-\-auto \-\-quiet | less
+.TP
+Exclude domains, filter by region:
+.B pplx\-research "tax filing deadlines" \-e reddit.com \-e quora.com \-r US
+.TP
+Post result to webhook:
+.B pplx\-research "competitor analysis" \-\-mode synthesis \-\-webhook https://hooks.example.com/research
+.SH ENVIRONMENT
+.TP
+.B PERPLEXITY_API_KEY
+Required. Your Perplexity API key. Obtain one at
+.IR https://www.perplexity.ai/settings/api .
+The tool will exit with an error if this variable is not set and no
+.I ~/.env
+file provides it.
+.SH FILES
+.TP
+.I ~/.env
+If present, this file is read for environment variables including
+.BR PERPLEXITY_API_KEY .
+Standard
+.I key=value
+format, one per line. Lines beginning with
+.B #
+are treated as comments.
+.SH AUTHOR
+Written by kleinpanic. Source and issue tracker:
+.I https://github.com/kleinpanic/pplx-research
+.SH SEE ALSO
+.BR curl (1),
+.BR jq (1)
